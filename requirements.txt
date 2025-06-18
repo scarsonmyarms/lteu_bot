@@ -1,0 +1,12 @@
+asyncpg
+aiogram
+APScheduler
+python-decouple
+Faker
+beautifulsoup4
+requests
+user-agents
+fake-useragent
+sqlalchemy
+asyncpg_lite
+pytz
