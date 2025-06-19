@@ -1,6 +1,4 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, KeyboardButtonPollType, InlineKeyboardButton, \
-    InlineKeyboardMarkup
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 
 def main_kb():
@@ -29,15 +27,4 @@ def vstupnik_kb():
     )
     return keyboard
 
-def magistr_kb():
-    kb_list = [
-        [KeyboardButton(text="спеціальності"), KeyboardButton(text="ціна")],
-        [KeyboardButton(text='Назад')]
-    ]
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=kb_list,
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
-    return keyboard
 

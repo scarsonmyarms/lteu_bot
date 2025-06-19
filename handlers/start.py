@@ -1,11 +1,12 @@
 from aiogram import Router, F
-from aiogram.filters import CommandStart, Command, CommandObject
+from aiogram.filters import CommandStart
 from aiogram.types import Message
 from kb.all_kb import main_kb, vstupnik_kb
 from utils.my_utils import (get_rektor, parse_hostel_info, parse_priyomna_numbers, parse_priyomna_info, stolova, bakalavr_specialitation, magistr_specialitation,
                             get_now_time)
 from aiogram.utils.markdown import hlink
-from db_handler.db_class import insert_user
+# вставлення даних про користувача в базу даних
+# from db_handler.db_class import insert_user
 
 start_router = Router()
 
@@ -40,12 +41,12 @@ async def contacts_info(message: Message):
 async def rektor_info(message: Message):
     prinimaet_rektor = get_rektor()
 
-    # Функция для форматирования телефонных номеров в HTML
+    # Функція для форматування номерів
     def format_phones(phone_str):
         phones = phone_str.split(', ')
         return '\n'.join([f'<code>{phone}</code>' for phone in phones])
 
-    # Форматируем сообщение для ректора
+    # Форматуємо повідомлення зі списком контактів ректорату
     formated_prinimaet_rektor = (
         f"🏛 <b>Приймальна ректора LUTE:</b>\n\n"
         f"📍 <b>Адрес:</b> {prinimaet_rektor['адреса']}\n"
@@ -54,8 +55,7 @@ async def rektor_info(message: Message):
         f"📧 <b>E-mail: </b>{prinimaet_rektor['e-mail']}"
     )
 
-    # Отправляем сообщения
-    await message.answer("Ось список контактів (якщо на них настиснеш то вони скопіюються)")
+    await message.answer("Ось список контактів:")
     await message.answer(formated_prinimaet_rektor)
 
 
@@ -67,18 +67,21 @@ async def start_command(message: Message):
 @start_router.message(CommandStart())
 async def start_command(message: Message):
 
-    user_id = message.from_user.id
-    full_name = message.from_user.full_name
-    user_login = message.from_user.username
+    # збір даних про користувача та вставлення його в таблицю
 
-    user_data = {
-        "user_id": user_id,
-        "full_name": full_name,
-        "user_login": user_login,
-        'date_reg': get_now_time()
-    }
+    # user_id = message.from_user.id
+    # full_name = message.from_user.full_name
+    # user_login = message.from_user.username
+    #
+    # user_data = {
+    #     "user_id": user_id,
+    #     "full_name": full_name,
+    #     "user_login": user_login,
+    #     # 'date_reg': get_now_time()
+    # }
+    #
+    # await insert_user(user_data=user_data)
 
-    await insert_user(user_data=user_data)
     await message.answer("Привіт! Використай клавіатуру знизу щоб знайти потрібну інформацію.",
                          reply_markup=main_kb())
 
@@ -103,7 +106,7 @@ async def start_command(message: Message):
 
     spec_link = 'https://www.lute.lviv.ua/admissions/gss/sp/?L=350'
 
-    # Форматируем в красивый список
+    # Форматуємо
     formatted_text = "🎓 <b>Спеціальності:</b>\n\n" + "\n".join(
         f"▪️ {spec}" for spec in specialties
     )
@@ -121,7 +124,7 @@ async def price(message: Message):
 
     await message.answer(text, reply_markup=vstupnik_kb())
 
-#інформація про грутожиток
+# інформація про гуртожиток
 @start_router.message(F.text.lower().contains('гуртожит'))
 async def hostel(message: Message):
     hostel_info = parse_hostel_info()
@@ -140,7 +143,7 @@ async def hostel(message: Message):
     await message.answer(formated_text)
     await message.answer(hostel_link, reply_markup=vstupnik_kb())
 
-
+# Інформація про їдальню
 @start_router.message(F.text == 'їдальня')
 async def dinnig_room(message: Message):
 
@@ -150,7 +153,7 @@ async def dinnig_room(message: Message):
     await message.answer(dinner_info)
     await message.answer(link)
 
-#аспіратн
+# аспіратура
 @start_router.message(F.text.lower().contains('аспірантура'))
 async def start_command(message: Message):
 
@@ -159,29 +162,27 @@ async def start_command(message: Message):
     'правилами прийому до аспірантури та докторантури'
 
     await message.answer(f"По силанням ви можете ознайомитись з правилами прийому до аспірантури та докторантури:\n{linl_aspir}",
-                         reply_markup=vstupnik_kb())
+                         reply_markup=main_kb())
 
-#магістр
+# магістратура
 @start_router.message(F.text == 'Магістратура')
 async def start_command(message: Message):
 
     price_link = hlink('Натисніть щоб переглянути вартсіть Навчання','https://www.lute.lviv.ua/fileadmin/www.lac.lviv.ua/data/Abitura/LAC_Documents/Pravyla_Pryyomu/2022_Unifikovane/DODATOK_1.pdf')
 
-    # text = f'За цим посилання м ти можеш ознайомитись з вартістю навчання за Освітній ступінь бакалавр та магістр: {price_link}\n'
-
     specialties = magistr_specialitation()
 
     specialties_link = 'https://www.lute.lviv.ua/admissions/gss/sp/?L=350'
 
-    # Форматируем в красивый список
+    # Форматуємо
     formatted_text = "🎓 <b>Спеціальності:</b>\n\n" + "\n".join(
         f"▪️ {spec}" for spec in specialties
     )
 
     await message.answer(f'{formatted_text}\n\nДетальніше про кожну з спеціальностей за посиланням:\n{specialties_link}')
-    await message.answer(price_link)
+    await message.answer(price_link, reply_markup=main_kb())
 
-#іноземці
+# особам з спеціальними потребами
 @start_router.message(F.text == 'спеціальні потреби')
 async def start_command(message: Message):
 
@@ -189,9 +190,10 @@ async def start_command(message: Message):
 
     await message.answer(f'Умови навчання для осіб з особливими освітніми потребами: \n\n{link}')
 
+# іноземним студентам
 @start_router.message(F.text == 'Іноземним студентам')
 async def start_command(message: Message):
 
     link = 'https://www.lute.lviv.ua/admissions/dovuzivska-pidgotovka-inozemciv-ta-osib-bez-gromadjanstva/?L=2'
-    await message.answer(f'Детальніше про навчання інощемних студентів за посиланням: \n{link}')
+    await message.answer(f'Детальніше про навчання іноземних студентів за посиланням: \n{link}', reply_markup=main_kb())
 
